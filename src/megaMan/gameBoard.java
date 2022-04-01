@@ -4,6 +4,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -12,6 +14,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -37,9 +40,11 @@ public class gameBoard extends JPanel {
 	protected volatile Obj newObj;
 	protected static int xScroll=0;
 	protected static int yScroll=0;
+	protected File envDefFile;
 	public gameBoard() throws IOException {
 		man = new Character();
 		heart = ImageIO.read(ClassLoader.getSystemResource("heart.png"));
+		envDefFile = new File("src/megaMan/envDef.txt");
 		newObj = new Brick(6, 6);
 //		statics.add((StaticObj)newObj);
 		//Listener
@@ -132,8 +137,7 @@ public class gameBoard extends JPanel {
 		
 		int ct = 0;
 		try {
-			File myObj = new File("src/megaMan/genEnv");
-			Scanner inp = new Scanner(myObj);
+			Scanner inp = new Scanner(envDefFile);
 			while (inp.hasNextLine()) {
 				ct++;
 				switch(inp.next()) {
@@ -214,6 +218,20 @@ public class gameBoard extends JPanel {
 			}
 			if(newObj instanceof DynamicObj)dynamics.add((DynamicObj)newObj);
 			newObj = (Obj) newObj.clone();
+		}
+	}
+	private class updateEnvDef implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				FileOutputStream out = new FileOutputStream(envDefFile);
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
 		}
 	}
 }//end class
