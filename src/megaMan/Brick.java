@@ -16,8 +16,12 @@ public class Brick extends StaticObj{
 	/**
 	 * Adds brick, on brick-sized grid. To place at specific pixel, use freeBrick
 	 */
-	public Brick(int x, int y) {
-		super(x*w,y*h,w,h);
+	public Brick(int x, int y, boolean snap) {
+		super(x,y,w,h);
+		if(snap) {
+			x = (int)((x/w)*w);
+			y = (int)((y/h)*h);
+		}
 		//load img if needed
 		if(img == null) {
 			try {
@@ -28,15 +32,6 @@ public class Brick extends StaticObj{
 				e.printStackTrace();
 			}
 		}
-	}
-	/**
-	 * Makes a brick at pixel, not locked to brick grid
-	 */
-	public static Brick freeBrick(int x, int y) {
-		Brick temp = new Brick(1,1);
-		temp.x = x;
-		temp.y = y;
-		return temp;
 	}
 	public void draw(Graphics2D g2d) {
 		g2d.drawImage(img, null, (int)getX(), (int)getY());

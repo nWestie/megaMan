@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -28,7 +29,7 @@ public class gameBoard extends JPanel {
 	
 	static boolean exitFlag = false;
 	static boolean dieFlag = false;
-	static Rectangle viewBounds;
+	static final Rectangle viewBounds= new Rectangle(0,0,1200,800);;
 	//variables
 	protected Character man;
 	protected BufferedImage heart;
@@ -41,11 +42,12 @@ public class gameBoard extends JPanel {
 	protected static int xScroll=0;
 	protected static int yScroll=0;
 	protected File envDefFile;
+	WriteEnv envWriter;
 	public gameBoard() throws IOException {
 		man = new Character();
 		heart = ImageIO.read(ClassLoader.getSystemResource("heart.png"));
-		envDefFile = new File("src/megaMan/envDef.txt");
-		newObj = new Brick(6, 6);
+		envDefFile = new File("src/megaMan/newEnvDef.txt");
+		newObj = new Brick(0, 0, true);
 //		statics.add((StaticObj)newObj);
 		//Listener
 		addKeyListener(new KeyInput());
@@ -81,6 +83,8 @@ public class gameBoard extends JPanel {
 	
 	private void run() {
 		buildEnv();
+		envWriter = new WriteEnv();
+		envWriter.start();
 		long nextLoop;
 		while(true) {
 			nextLoop = System.currentTimeMillis()+tStep;
@@ -113,7 +117,6 @@ public class gameBoard extends JPanel {
 		System.out.println("finished");
 	}
 	public static void main(String[] args) throws IOException {
-		viewBounds = new Rectangle(0,0,1200,800);
 
 		JFrame frame = new JFrame();
 		frame.setTitle("Megaman");
@@ -142,7 +145,7 @@ public class gameBoard extends JPanel {
 				ct++;
 				switch(inp.next()) {
 				case "B":
-					statics.add(new Brick(inp.nextInt(), inp.nextInt()));
+					statics.add(new Brick(inp.nextInt(), inp.nextInt(), false));
 					break;
 //				case "G":
 //					System.out.printf("Goumba(%d, %d, %d)\n", inp.nextInt(), inp.nextInt(), inp.nextInt());
@@ -152,8 +155,8 @@ public class gameBoard extends JPanel {
 				}
 		    }
 		    inp.close();
-	    } catch (FileNotFoundException e) {
-	    	System.out.println(String.format("Error on line", ct));
+	    } catch (Exception e) {
+	    	System.out.println(String.format("Error on line %d", ct));
 	    	e.printStackTrace();
 	    }
 		
@@ -192,6 +195,7 @@ public class gameBoard extends JPanel {
 		}
 	}
 	private class MouseEvents extends MouseAdapter{
+		
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			if(newObj instanceof Brick) {
@@ -207,31 +211,41 @@ public class gameBoard extends JPanel {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if(newObj instanceof StaticObj) {
-				System.out.printf("B %d %d\n", newObj.x/newObj.width, newObj.y/newObj.height);
+//				System.out.printf("B %d %d\n", newObj.x/newObj.width, newObj.y/newObj.height);
 				for(StaticObj o:statics) {
 					if(newObj.equals(o)) {
 						statics.remove(o);
+						envWriter.update = true;
 						return;
 					}
 				}
 				statics.add((StaticObj)newObj);
+				envWriter.update = true;
 			}
 			if(newObj instanceof DynamicObj)dynamics.add((DynamicObj)newObj);
 			newObj = (Obj) newObj.clone();
 		}
 	}
-	private class updateEnvDef implements ActionListener{
-
+	private class WriteEnv extends Thread{
+		protected volatile boolean update;
 		@Override
-		public void actionPerformed(ActionEvent e) {
+		public void run() {
 			try {
-				FileOutputStream out = new FileOutputStream(envDefFile);
+//				System.out.println("Env Writer started");
+				while(!exitFlag) {
+					while(!update);
+					update = false;
+					PrintWriter output = new PrintWriter(new FileOutputStream(envDefFile, false));
+					for(StaticObj o: statics) {
+						output.printf("%s %d %d\n", "B", o.x, o.y);
+					}
+//					System.out.println("Done Writing");
+					output.close();
+				}
 			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
+				System.out.println("Error saving enviroment");
 				e1.printStackTrace();
 			}
-			
-			
 		}
 	}
 }//end class
