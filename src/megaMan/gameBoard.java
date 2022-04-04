@@ -4,13 +4,10 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,7 +18,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class gameBoard extends JPanel {	
-	static final boolean showBounds = true;
+	private static final long serialVersionUID = 1L;
+	static final boolean showBounds = false;
 	static int fps = 20;
 	static int tStep = 1000/fps;
 	static int hScrollBound = 270;

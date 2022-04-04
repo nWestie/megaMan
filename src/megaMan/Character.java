@@ -24,7 +24,7 @@ public class Character extends DynamicObj{
 		acc = 6;
 		dAcc = .3;
 		maxJumps = 2;
-		g = -1;
+//		g = -1;
 		
 		if(lImgs!=null)return;//only add images once
 		int[] rpos = 	{0, 107, 139, 159, 183, 215, 249, 277, 300, 328, 359, 393};
@@ -47,8 +47,10 @@ public class Character extends DynamicObj{
 	@Override
 	public void draw(Graphics2D g2d) {
 		g2d.setColor(Color.black);
-		if(gameBoard.showBounds) g2d.draw(this);
-		g2d.drawString(String.format("%d, %d",(int)xVel,(int)yVel), x, y-5);
+		if(gameBoard.showBounds) {
+			g2d.draw(this);
+			g2d.drawString(String.format("%d, %d",(int)xVel,(int)yVel), x, y-5);
+		}
 		switch(move) {
 		case 1:
 			g2d.drawImage(rImgs[(int)animInd], null, x, y);
@@ -120,7 +122,7 @@ public class Character extends DynamicObj{
 					translate(0,-(int)temp.getHeight());
 					jumps=0;
 				}
-				if(yVel < -30){
+				if(yVel < -45){
 					damage(1);
 				}
 				yVel=0;
