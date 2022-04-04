@@ -22,8 +22,9 @@ public class Character extends DynamicObj{
 	public Character() {
 		super(400, 200, 31, 33);
 		acc = 6;
-		dAcc = .2;
+		dAcc = .3;
 		maxJumps = 2;
+		g = -1;
 		
 		if(lImgs!=null)return;//only add images once
 		int[] rpos = 	{0, 107, 139, 159, 183, 215, 249, 277, 300, 328, 359, 393};
@@ -47,6 +48,7 @@ public class Character extends DynamicObj{
 	public void draw(Graphics2D g2d) {
 		g2d.setColor(Color.black);
 		if(gameBoard.showBounds) g2d.draw(this);
+		g2d.drawString(String.format("%d, %d",(int)xVel,(int)yVel), x, y-5);
 		switch(move) {
 		case 1:
 			g2d.drawImage(rImgs[(int)animInd], null, x, y);
@@ -107,7 +109,7 @@ public class Character extends DynamicObj{
 			}
 		}
 		yVel -= g;
-		yVel = Math.max(-30,yVel);
+		yVel = Math.max(-50,yVel);
 		translate(0,(int)-yVel);
 		for(StaticObj obj:statics) {//if now colliding, undo movement
 			temp = this.intersection(obj);
@@ -117,6 +119,9 @@ public class Character extends DynamicObj{
 				else{ //hit on ground
 					translate(0,-(int)temp.getHeight());
 					jumps=0;
+				}
+				if(yVel < -30){
+					damage(1);
 				}
 				yVel=0;
 			}
@@ -131,7 +136,7 @@ public class Character extends DynamicObj{
 				}
 			}
 		}
-		if(this.y > 2000)
+		if(this.y > 1500)
 			gameBoard.dieFlag = true;
 	}
 	@Override

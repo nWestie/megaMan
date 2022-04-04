@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class resetEnvDef {
 
 	public static void main(String[] args) {
-	int ct = 0;
+		int ct = 0;
 		try {
 			File envDefFile = new File("src/megaMan/envDef.txt");
 			FileOutputStream outFile = new FileOutputStream("src/megaMan/newEnvDef.txt", false);

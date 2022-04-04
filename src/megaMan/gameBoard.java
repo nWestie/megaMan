@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class gameBoard extends JPanel {	
-	static final boolean showBounds = false;
+	static final boolean showBounds = true;
 	static int fps = 20;
 	static int tStep = 1000/fps;
 	static int hScrollBound = 270;
@@ -67,14 +67,14 @@ public class gameBoard extends JPanel {
 			g2d.drawLine(xScroll, yScroll+viewBounds.height-vScrollBound,xScroll+viewBounds.width, yScroll+viewBounds.height-vScrollBound);
 		}
 
-		newObj.draw(g2d);
-		g2d.setColor(new Color(0x88FFFFFF, true));
-		g2d.fillRect(newObj.x, newObj.y, newObj.width, newObj.height);
-		
 		for(StaticObj o:statics)o.draw(g2d); 
 		for(DynamicObj e:dynamics)e.draw(g2d); 
 		man.draw(g2d);
 		
+		newObj.draw(g2d);
+		g2d.setColor(new Color(0x88FFFFFF, true));
+		g2d.fillRect(newObj.x, newObj.y, newObj.width, newObj.height);
+
 		//draw overlay
 		g2d.translate(xScroll, yScroll);
 		for(int i = 0; i < man.lives; i++)
@@ -199,9 +199,9 @@ public class gameBoard extends JPanel {
 		@Override
 		public void mouseMoved(MouseEvent e) {
 			if(newObj instanceof Brick) {
-				newObj.x = (int)((xScroll+e.getX())/newObj.width)*newObj.width;
-				newObj.y = (int)(yScroll+e.getY())/newObj.height*newObj.height;
-//				System.out.printf("(%d, %d)");
+				newObj.x = (int)(Math.floor((double)(xScroll+e.getX())/newObj.width)*newObj.width);
+				newObj.y = (int)(Math.floor((double)(yScroll+e.getY())/newObj.height)*newObj.height);
+				System.out.printf("(%d, %d)\n", newObj.x, newObj.y);
 			}else {				
 				newObj.x = xScroll+e.getX()-newObj.width/2;
 				newObj.y = yScroll+e.getY()-newObj.height/2;

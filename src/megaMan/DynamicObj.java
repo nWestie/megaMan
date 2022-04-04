@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 public abstract class DynamicObj extends Obj{
 	private static final long serialVersionUID = 1L;
-	protected final double g = 2.3;
+	protected double g = 2;
 
 	protected volatile byte move = 0; //-1 left, 1 right, 0 stop
 	protected volatile boolean jump = false;
