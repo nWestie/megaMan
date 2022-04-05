@@ -27,10 +27,14 @@ public class gameBoard extends JPanel {
 	
 	static boolean exitFlag = false;
 	static boolean dieFlag = false;
-	static final Rectangle viewBounds= new Rectangle(0,0,1200,800);;
+	static boolean inMenu = false;
+	static final Rectangle viewBounds= new Rectangle(0,0,1200,800);
+	protected Rectangle playBox = new Rectangle(200,340, 200, 80);
+	protected Rectangle exitBox = new Rectangle(200,540, 180, 80);
 	//variables
 	protected Character man;
 	protected BufferedImage heart;
+	protected BufferedImage menuBG;
 	
 	//each dynamic obj handles collisions with static world individually
 	//Interactions between dynamic objs
@@ -44,8 +48,8 @@ public class gameBoard extends JPanel {
 	public gameBoard() throws IOException {
 		man = new Character();
 		heart = ImageIO.read(ClassLoader.getSystemResource("heart.png"));
+		menuBG = ImageIO.read(ClassLoader.getSystemResource("menuBG.png"));
 		envDefFile = new File("src/megaMan/newEnvDef.txt");
-		newObj = new Brick(0, 0, true);
 //		statics.add((StaticObj)newObj);
 		//Listener
 		addKeyListener(new KeyInput());
@@ -57,6 +61,29 @@ public class gameBoard extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D)g;
+		if(inMenu) {
+			g2d.drawImage(menuBG, null, 0, 0);
+			newObj.draw(g2d);
+//			g2d.setColor(Color.red);
+//			g2d.draw(playBox);
+//			g2d.draw(exitBox);
+			g2d.setColor(Color.white);
+			if(playBox.contains(newObj.x, newObj.y)) {
+				g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 80));				
+				g2d.drawString("PLAY", 200, 400);
+			}else {
+				g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 70));				
+				g2d.drawString("PLAY", 205, 404);
+			}
+			if(exitBox.contains(newObj.x, newObj.y)) {
+				g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 80));				
+				g2d.drawString("EXIT", 200, 600);				
+			}else {
+				g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 70));				
+				g2d.drawString("EXIT", 205, 604);				
+			}
+			return;
+		}
 		g2d.translate(-xScroll, -yScroll);
 		if(showBounds) {
 			g2d.drawLine(hScrollBound+xScroll,yScroll,hScrollBound+xScroll,viewBounds.height+yScroll);
@@ -83,6 +110,7 @@ public class gameBoard extends JPanel {
 		buildEnv();
 		envWriter = new WriteEnv();
 		envWriter.start();
+		newObj = new Brick(0, 0, true);
 		long nextLoop;
 		while(true) {
 			nextLoop = System.currentTimeMillis()+tStep;
@@ -106,13 +134,13 @@ public class gameBoard extends JPanel {
 				yScroll = (int)(man.getY()+vScrollBound-viewBounds.height);
 			
 			repaint();
-			if(dieFlag) {
+			if(dieFlag || man.lives <=0) {
 				repaint();
+				exitFlag = true;
 				break;
 			}
 			while(System.currentTimeMillis()<nextLoop);
 		}
-		System.out.println("finished");
 	}
 	public static void main(String[] args) throws IOException {
 
@@ -130,12 +158,25 @@ public class gameBoard extends JPanel {
 		game.menu();
 	}//end main
 	private void menu() {
-		run();
+		while(true) {
+			inMenu = true;
+			MenuPtr ptr = new MenuPtr();
+			newObj = ptr;
+			while(true) {
+				if(playBox.contains(ptr.cPos))break;
+				if(exitBox.contains(ptr.cPos))System.exit(0);
+			}
+			inMenu = false;
+			run();
+			statics = new ArrayList<>();
+			dynamics = new ArrayList<>();
+			xScroll = 0;
+			yScroll = 0;
+		}
 	}
 
 
 	private void buildEnv() {
-		
 		int ct = 0;
 		try {
 			Scanner inp = new Scanner(envDefFile);
@@ -199,7 +240,7 @@ public class gameBoard extends JPanel {
 			if(newObj instanceof Brick) {
 				newObj.x = (int)(Math.floor((double)(xScroll+e.getX())/newObj.width)*newObj.width);
 				newObj.y = (int)(Math.floor((double)(yScroll+e.getY())/newObj.height)*newObj.height);
-				System.out.printf("(%d, %d)\n", newObj.x, newObj.y);
+//				System.out.printf("(%d, %d)\n", newObj.x, newObj.y);
 			}else {				
 				newObj.x = xScroll+e.getX()-newObj.width/2;
 				newObj.y = yScroll+e.getY()-newObj.height/2;
@@ -214,6 +255,7 @@ public class gameBoard extends JPanel {
 					if(newObj.equals(o)) {
 						statics.remove(o);
 						envWriter.update = true;
+						newObj = (Obj) newObj.clone();
 						return;
 					}
 				}
@@ -221,6 +263,7 @@ public class gameBoard extends JPanel {
 				envWriter.update = true;
 			}
 			if(newObj instanceof DynamicObj)dynamics.add((DynamicObj)newObj);
+			if(newObj instanceof MenuPtr)((MenuPtr)newObj).cPos = new Point(e.getX(), e.getY());
 			newObj = (Obj) newObj.clone();
 		}
 	}
